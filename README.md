@@ -42,14 +42,14 @@ Lab1/
 
 `app.go`
 
-`frontend/App.jsx`
+`frontend/scr/App.jsx`
 
 
 ### 📌 Назначение файлов
 
 - `main.go` — точка входа в приложение  
 - `app.go` — основная логика (шифрование, дешифрование)  
-- `frontend/App.jsx` — графический интерфейс  
+- `frontend/scr/App.jsx` — графический интерфейс  
 
 ---
 
@@ -75,14 +75,14 @@ Lab1/
 
 `app.go`
 
-`frontend/App.jsx`
+`frontend/scr/App.jsx`
 
 
 ### 📌 Назначение файлов
 
 - `main.go` — точка входа  
 - `app.go` — реализация алгоритма  
-- `frontend/App.jsx` — графический интерфейс  
+- `frontend/scr/App.jsx` — графический интерфейс  
 
 ---
 
