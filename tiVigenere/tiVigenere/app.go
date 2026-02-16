@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-const SIZE_ALPHABET = 26
-
 // App struct
 type App struct {
 	ctx context.Context
@@ -23,31 +21,28 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-const SIZE = 4
-const SIZE_STRING = 16
-
-func speenMatrix(matrix *[SIZE][SIZE]byte) [SIZE][SIZE]byte {
-	var temparr [SIZE][SIZE]byte = [SIZE][SIZE]byte{}
-	for i := 0; i < SIZE; i++ {
-		for j := 0; j < SIZE; j++ {
-			temparr[i][j] = matrix[j][SIZE-i-1]
-		}
-	}
-	*matrix = temparr
-	return *matrix
-}
+const SIZE_ALPHABET = 33
 
 func (a *App) Encrypt(str string, key string) string {
 	i := 0
 	resultStr := ""
-	for len(str) > len(key) {
-		key += string(key[i] + 1)
-		i++
-	}
+
 	str = strings.ToUpper(strings.ReplaceAll(str, " ", ""))
 	key = strings.ToUpper(strings.ReplaceAll(key, " ", ""))
-	for i := 0; i < len(str); i++ {
-		resultStr += string(((str[i]-'A')+(key[i]-'A'))%SIZE_ALPHABET + 'A')
+
+	strRunes := []rune(str)
+	keyRunes := []rune(key)
+
+	for len(strRunes) > len(keyRunes) {
+		keyRunes = append(keyRunes, keyRunes[i]+1)
+		i++
+	}
+
+	for i := 0; i < len(strRunes); i++ {
+		strIdx := getRuneIndex(strRunes[i])
+		keyIdx := getRuneIndex(keyRunes[i])
+		encryptedIdx := (strIdx + keyIdx) % SIZE_ALPHABET
+		resultStr += string(getRuneByIndex(encryptedIdx))
 	}
 
 	return resultStr
@@ -56,15 +51,46 @@ func (a *App) Encrypt(str string, key string) string {
 func (a *App) Decrypt(str string, key string) string {
 	i := 0
 	resultStr := ""
-	for len(str) > len(key) {
-		key += string(key[i] + 1)
-		i++
-	}
+
 	str = strings.ToUpper(strings.ReplaceAll(str, " ", ""))
 	key = strings.ToUpper(strings.ReplaceAll(key, " ", ""))
-	for i := 0; i < len(str); i++ {
-		resultStr += string(((str[i]-'A')-(key[i]-'A')+SIZE_ALPHABET)%SIZE_ALPHABET + 'A')
+
+	strRunes := []rune(str)
+	keyRunes := []rune(key)
+
+	for len(strRunes) > len(keyRunes) {
+		keyRunes = append(keyRunes, keyRunes[i]+1)
+		i++
+	}
+
+	for i := 0; i < len(strRunes); i++ {
+		strIdx := getRuneIndex(strRunes[i])
+		keyIdx := getRuneIndex(keyRunes[i])
+
+		decryptedIdx := (strIdx - keyIdx + SIZE_ALPHABET) % SIZE_ALPHABET
+		resultStr += string(getRuneByIndex(decryptedIdx))
 	}
 
 	return resultStr
+}
+
+func getRuneIndex(r rune) int {
+
+	alphabet := []rune("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
+
+	for i, letter := range alphabet {
+		if letter == r {
+			return i
+		}
+	}
+	return 0
+}
+
+func getRuneByIndex(idx int) rune {
+	alphabet := []rune("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
+
+	if idx >= 0 && idx < len(alphabet) {
+		return alphabet[idx]
+	}
+	return 'А'
 }

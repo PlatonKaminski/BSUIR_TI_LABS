@@ -9,16 +9,16 @@ function App() {
 
     const handleSourceChange = (e) => {
         const value = e.target.value;
-        // Разрешены только a-z, A-Z и пробел
-        const onlyEnglish = value.replace(/[^a-zA-Z\s]/g, '');
-        setSourceText(onlyEnglish);
+        // Разрешены только русские буквы (А-Яа-я) и пробел
+        const onlyRussian = value.replace(/[^а-яА-ЯёЁ\s]/g, '');
+        setSourceText(onlyRussian);
     };
 
     const handleKeyChange = (e) => {
         const value = e.target.value;
-        // Для ключа тоже только английские буквы
-        const onlyEnglish = value.replace(/[^a-zA-Z]/g, '');
-        setKeyText(onlyEnglish);
+        // Для ключа только русские буквы (без пробелов)
+        const onlyRussian = value.replace(/[^а-яА-ЯёЁ]/g, '');
+        setKeyText(onlyRussian);
     };
 
     const handleEncrypt = () => {
@@ -50,22 +50,22 @@ function App() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.txt,.text,.md,.csv'; // разрешенные расширения
-        
+
         input.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 const content = event.target.result;
-                // Фильтруем только английские буквы и пробелы
-                const onlyEnglish = content.replace(/[^a-zA-Z\s]/g, '');
-                setSourceText(onlyEnglish);
-                
+                // Фильтруем только русские буквы и пробелы
+                const onlyRussian = content.replace(/[^а-яА-ЯёЁ\s]/g, '');
+                setSourceText(onlyRussian);
+
             }
             reader.readAsText(file);
         };
-        
+
         input.click();
     };
 
