@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import { EncryptV, DecryptV, EncryptM, DecryptM } from "../wailsjs/go/main/App";
+import { EncryptV, DecryptV, EncryptM, DecryptM, SaveFile, WriteFile } from "../wailsjs/go/main/App";
 
 function App() {
     const [sourceText, setSourceText] = useState('');
@@ -17,36 +17,19 @@ function App() {
     };
 
     const handleSourceChange = (e) => {
-        const value = e.target.value;
-        let filteredValue = value;
-
-        if (selectedMethod === 'vigenere') {
-            filteredValue = value.replace(/[^а-яА-ЯёЁ\s]/g, '');
-        } else if (selectedMethod === 'grille') {
-            filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
-
-        }
-
-        setSourceText(filteredValue);
+        setSourceText(e.target.value);
         setResultText('');
     };
 
     const handleKeyChange = (e) => {
-        const value = e.target.value;
-        let filteredValue = value;
-
-        if (selectedMethod === 'vigenere') {
-            filteredValue = value.replace(/[^а-яА-ЯёЁ]/g, '');
-        }
-
-        setKeyText(filteredValue);
+        setKeyText(e.target.value);
         setResultText('');
     };
 
     const handleEncrypt = () => {
         if (selectedMethod === 'vigenere') {
             if (!sourceText.trim() || !keyText.trim()) {
-                setResultText('⚠️ Введите текст и ключ на русском!');
+                setResultText('⚠️ Введите текст и ключ!');
                 return;
             }
 
@@ -56,11 +39,9 @@ function App() {
             });
         } else if (selectedMethod === 'grille') {
             if (!sourceText.trim()) {
-                setResultText('⚠️ Введите текст на английском!');
+                setResultText('⚠️ Введите текст!');
                 return;
             }
-
-
 
             EncryptM(sourceText, GRILLE_SIZE.toString()).then(setResultText).catch(error => {
                 setResultText('⚠️ Ошибка шифрования');
@@ -72,7 +53,7 @@ function App() {
     const handleDecrypt = () => {
         if (selectedMethod === 'vigenere') {
             if (!sourceText.trim() || !keyText.trim()) {
-                setResultText('⚠️ Введите текст и ключ на русском!');
+                setResultText('⚠️ Введите текст и ключ!');
                 return;
             }
             DecryptV(sourceText, keyText).then(setResultText).catch(error => {
@@ -81,7 +62,7 @@ function App() {
             });
         } else if (selectedMethod === 'grille') {
             if (!sourceText.trim()) {
-                setResultText('⚠️ Введите текст на английском!');
+                setResultText('⚠️ Введите текст!');
                 return;
             }
 
@@ -116,24 +97,35 @@ function App() {
             const reader = new FileReader();
             reader.onload = (event) => {
                 const content = event.target.result;
-                let filteredContent = content;
-
-                if (selectedMethod === 'vigenere') {
-                    filteredContent = content.replace(/[^а-яА-ЯёЁ\s]/g, '');
-                } else if (selectedMethod === 'grille') {
-                    filteredContent = content.replace(/[^a-zA-Z\s]/g, '');
-                    if (filteredContent.length > GRILLE_SIZE * GRILLE_SIZE) {
-                        filteredContent = filteredContent.slice(0, GRILLE_SIZE * GRILLE_SIZE);
-                    }
-                }
-
-                setSourceText(filteredContent);
+                // Убираем фильтрацию при чтении из файла
+                setSourceText(content);
                 setResultText('');
             };
             reader.readAsText(file);
         };
 
         input.click();
+    };
+
+    const handleSaveToFile = async () => {
+        if (!resultText.trim()) {
+            alert('Нет данных для сохранения!');
+            return;
+        }
+
+        try {
+            // Открываем диалог сохранения файла
+            const filePath = await SaveFile();
+
+            if (filePath) { // Если пользователь выбрал файл (не нажал Отмена)
+                // Записываем данные в файл
+                await WriteFile(filePath, resultText);
+                alert(`Файл успешно сохранен: ${filePath}`);
+            }
+        } catch (error) {
+            console.error('Ошибка при сохранении файла:', error);
+            alert('Ошибка при сохранении файла: ' + error);
+        }
     };
 
     return (
@@ -180,12 +172,12 @@ function App() {
                     autoComplete="off"
                     type="text"
                     placeholder={selectedMethod === 'vigenere'
-                        ? "Введите ключ на русском..."
+                        ? "Введите ключ..."
                         : "Ключ не требуется для этого метода"}
                 />
                 <div className="input-hint">
                     {selectedMethod === 'vigenere'
-                        ? "Только русские буквы"
+                        ? "Русские буквы"
                         : "Поле недоступно для шифра поворотной решетки"}
                 </div>
             </div>
@@ -198,14 +190,12 @@ function App() {
                     onChange={handleSourceChange}
                     autoComplete="off"
                     type="text"
-                    placeholder={selectedMethod === 'vigenere'
-                        ? "Введите текст на русском..."
-                        : `Введите текст на английском`}
+                    placeholder="Введите текст..."
                 />
                 <div className="input-hint">
                     {selectedMethod === 'vigenere'
-                        ? "Только русские буквы и пробелы"
-                        : `Только английские буквы`}
+                        ? "Русские буквы"
+                        : "Английские буквы"}
                 </div>
                 {selectedMethod === 'grille' && (
                     <div className="input-counter">
@@ -233,6 +223,9 @@ function App() {
                 </button>
                 <button className="btn btn-file" onClick={handleReadFile}>
                     Прочитать из файла
+                </button>
+                <button className="btn btn-save" onClick={handleSaveToFile}>
+                    Сохранить в файл
                 </button>
                 <button className="btn btn-clear" onClick={handleClear}>
                     Очистить

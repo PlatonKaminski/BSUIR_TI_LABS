@@ -17,3 +17,11 @@ export function EncryptM(arg1) {
 export function EncryptV(arg1, arg2) {
   return window['go']['main']['App']['EncryptV'](arg1, arg2);
 }
+
+export function SaveFile() {
+  return window['go']['main']['App']['SaveFile']();
+}
+
+export function WriteFile(arg1, arg2) {
+  return window['go']['main']['App']['WriteFile'](arg1, arg2);
+}

@@ -8,3 +8,7 @@ export function DecryptV(arg1:string,arg2:string):Promise<string>;
 export function EncryptM(arg1:string):Promise<string>;
 
 export function EncryptV(arg1:string,arg2:string):Promise<string>;
+
+export function SaveFile():Promise<string>;
+
+export function WriteFile(arg1:string,arg2:string):Promise<void>;
